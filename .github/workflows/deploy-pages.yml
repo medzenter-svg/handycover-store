@@ -21,15 +21,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Create static copy from live site
+        shell: bash
         run: |
-          mkdir -p dist
-          wget --mirror --page-requisites --convert-links --adjust-extension --no-parent https://handycover.com/ -P mirror
-          cp -R mirror/handycover.com/. dist/
+          set -e
+          rm -rf dist mirror
+          mkdir -p dist mirror
+          wget --mirror --page-requisites --convert-links --adjust-extension --no-parent --execute robots=off https://handycover.com/ -P mirror || true
+          if [ -d mirror/handycover.com ]; then
+            cp -R mirror/handycover.com/. dist/
+          fi
+          if [ ! -f dist/index.html ]; then
+            curl -L --fail https://handycover.com/ -o dist/index.html
+          fi
           echo "handycover.store" > dist/CNAME
           cp dist/index.html dist/404.html
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
+        with:
+          enablement: true
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
