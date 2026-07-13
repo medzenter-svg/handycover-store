@@ -1,10 +1,9 @@
 name: Deploy Handycover to GitHub Pages
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
+  push:
+    branches: [main]
   schedule:
     - cron: "35 3 * * *"
 
@@ -21,26 +20,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out source website
-        uses: actions/checkout@v4
-        with:
-          repository: medzenter-svg/handycover-chic
-          ref: main
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build website
-        run: npm run build
-
-      - name: Add custom domain and SPA fallback
+      - name: Create static copy from live site
         run: |
+          mkdir -p dist
+          wget --mirror --page-requisites --convert-links --adjust-extension --no-parent https://handycover.com/ -P mirror
+          cp -R mirror/handycover.com/. dist/
           echo "handycover.store" > dist/CNAME
           cp dist/index.html dist/404.html
 
