@@ -20,19 +20,58 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Create static copy from live site
+      - name: Create complete static copy from live site
         shell: bash
         run: |
-          set -e
+          set -euo pipefail
           rm -rf dist mirror
           mkdir -p dist mirror
+
           wget --mirror --page-requisites --convert-links --adjust-extension --no-parent --execute robots=off https://handycover.com/ -P mirror || true
+
           if [ -d mirror/handycover.com ]; then
             cp -R mirror/handycover.com/. dist/
           fi
+
           if [ ! -f dist/index.html ]; then
             curl -L --fail https://handycover.com/ -o dist/index.html
           fi
+
+          python3 - <<'PY'
+from pathlib import Path
+import re, urllib.request, urllib.parse
+root = Path('dist')
+origin = 'https://handycover.com'
+patterns=[re.compile(r'''["'](/assets/[^"'?#]+\.(?:js|css|map))["']'''),re.compile(r'''["'](\./[^"'?#]+\.(?:js|css|map))["']''')]
+
+def fetch(p,rel=None):
+    if p.startswith('./') and rel is not None:
+        target=(rel.parent/p).resolve()
+        try: r=target.relative_to(root.resolve())
+        except: return False
+        web='/' + r.as_posix()
+    else:
+        web=p; target=root/Path(web.lstrip('/'))
+    if target.exists() and target.stat().st_size>0: return False
+    target.parent.mkdir(parents=True,exist_ok=True)
+    try:
+        with urllib.request.urlopen(origin+urllib.parse.quote(web,safe='/%:@')) as x:
+            target.write_bytes(x.read())
+        return True
+    except:
+        return False
+for _ in range(12):
+    changed=False
+    for f in list(root.rglob('*.html'))+list(root.rglob('*.js'))+list(root.rglob('*.css')):
+        txt=f.read_text(encoding='utf-8',errors='ignore')
+        for pat in patterns:
+            for m in pat.findall(txt):
+                changed |= fetch(m,f)
+    if not changed: break
+PY
+
+          find dist -type f \( -name '*.html' -o -name '*.js' -o -name '*.css' \) -print0 | xargs -0 sed -i -e 's|http://handycover\.com|https://handycover.com|g'
+
           echo "handycover.store" > dist/CNAME
           cp dist/index.html dist/404.html
 
