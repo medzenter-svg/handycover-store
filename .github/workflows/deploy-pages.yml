@@ -101,6 +101,24 @@ jobs:
               -e 's|http://handycover\.com|https://handycover.com|g' \
               -e 's|http://www\.handycover\.com|https://www.handycover.com|g'
 
+          cat > dist/sitemap.xml <<'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+            <url>
+              <loc>https://handycover.store/</loc>
+              <changefreq>weekly</changefreq>
+              <priority>1.0</priority>
+            </url>
+          </urlset>
+          EOF
+
+          cat > dist/robots.txt <<'EOF'
+          User-agent: *
+          Allow: /
+
+          Sitemap: https://handycover.store/sitemap.xml
+          EOF
+
           echo "handycover.store" > dist/CNAME
           cp dist/index.html dist/404.html
 
