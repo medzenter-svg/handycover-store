@@ -3,6 +3,10 @@
   if(!body)return;
 
   const main=document.querySelector('main')||body;
+  const path=(location.pathname||'/').replace(/index\.html$/,'');
+  const isHome=path==='/'||path==='';
+  body.classList.add(isHome?'hc-home':'hc-subpage');
+
   const amazonLinks=[...document.querySelectorAll('a[href*="amazon.de"]')];
   const firstAmazon=amazonLinks[0]||null;
 
@@ -32,8 +36,10 @@
     img.decoding='async';
   });
 
-  const h1=document.querySelector('h1');
-  if(h1&&!document.querySelector('.hc-hero-shell')){
+  const headings=[...document.querySelectorAll('h1')];
+  const h1=headings[0]||null;
+
+  if(isHome&&h1&&!document.querySelector('.hc-hero-shell')){
     const shell=h1.closest('section')||h1.closest('div')||h1.parentElement;
     if(shell&&shell!==body){
       shell.classList.add('hc-hero-shell');
@@ -65,7 +71,7 @@
       actions.className='hc-hero-actions';
       const primary=document.createElement('a');
       primary.className='hc-primary-cta';
-      primary.href=firstAmazon?'#'+(firstAmazon.closest('[id]')?.id||'hc-products'):'#hc-products';
+      primary.href='#hc-products';
       primary.textContent='Produkte entdecken';
       const secondary=document.createElement('a');
       secondary.className='hc-secondary-cta';
@@ -108,13 +114,40 @@
     }
   }
 
+  if(!isHome&&h1){
+    const shell=h1.closest('section')||h1.closest('div')||h1.parentElement;
+    if(shell&&shell!==body){
+      shell.classList.add('hc-subpage-intro');
+      const eyebrow=document.createElement('div');
+      eyebrow.className='hc-subpage-eyebrow';
+      eyebrow.textContent='HandyCover Kaufberatung';
+      shell.insertBefore(eyebrow,h1);
+
+      const firstParagraph=shell.querySelector('p');
+      if(firstParagraph)firstParagraph.classList.add('hc-subpage-lead');
+
+      const jump=document.createElement('div');
+      jump.className='hc-subpage-actions';
+      jump.innerHTML='<a class="hc-primary-cta" href="#hc-products">Empfehlungen ansehen</a><a class="hc-secondary-cta" href="#hc-guide">Kaufhilfe</a>';
+      if(firstParagraph)firstParagraph.insertAdjacentElement('afterend',jump);else shell.appendChild(jump);
+    }
+
+    const normalise=s=>s.toLowerCase().replace(/[^a-z0-9äöüß]+/g,' ').trim();
+    headings.slice(1).forEach(extra=>{
+      if(normalise(extra.textContent)===normalise(h1.textContent)){
+        const duplicateBlock=extra.closest('section')||extra.parentElement;
+        if(duplicateBlock)duplicateBlock.classList.add('hc-duplicate-heading-block');
+      }
+    });
+  }
+
   if(!document.querySelector('.hc-category-nav')){
     const nav=document.createElement('section');
     nav.className='hc-category-nav';
     nav.setAttribute('aria-label','Beliebte Kategorien');
     nav.innerHTML='<div class="hc-section-heading"><span>Schnelle Auswahl</span><h2>Was suchst du?</h2></div><div class="hc-category-pills"><a href="#hc-products">Handyhüllen</a><a href="#hc-products">Displayschutz</a><a href="#hc-products">MagSafe</a><a href="#hc-products">Ladegeräte & Kabel</a><a href="#hc-products">Powerbanks</a><a href="#hc-products">Auto-Zubehör</a></div>';
-    const hero=document.querySelector('.hc-hero-shell');
-    if(hero)hero.insertAdjacentElement('afterend',nav);else main.prepend(nav);
+    const intro=isHome?document.querySelector('.hc-hero-shell'):document.querySelector('.hc-subpage-intro');
+    if(intro)intro.insertAdjacentElement('afterend',nav);else main.prepend(nav);
   }
 
   const firstCard=amazonLinks.map(a=>a.closest('article,[class*="product"],[class*="card"]')).find(Boolean);
@@ -123,7 +156,7 @@
     if(!firstCard.querySelector('.hc-badge')){
       const badge=document.createElement('div');
       badge.className='hc-badge';
-      badge.textContent='Empfehlung der Woche';
+      badge.textContent='Empfehlung';
       firstCard.prepend(badge);
     }
     const productArea=firstCard.parentElement;
@@ -135,12 +168,12 @@
     trust.className='hc-trust';
     trust.id='hc-guide';
     trust.setAttribute('aria-label','So funktioniert HandyCover');
-    trust.innerHTML='<div><strong>1. Bedarf wählen</strong><span>Schutz, Laden, MagSafe oder Zubehör passend zum Alltag.</span></div><div><strong>2. Vorteile vergleichen</strong><span>Wir reduzieren die Auswahl auf relevante Merkmale und Einsatzbereiche.</span></div><div><strong>3. Bei Amazon prüfen</strong><span>Aktueller Preis, Verfügbarkeit, Versand und Rückgabe direkt beim Anbieter.</span></div>';
+    trust.innerHTML='<div><strong>1. Bedarf wählen</strong><span>Schutz, Laden, MagSafe oder Zubehör passend zum Alltag.</span></div><div><strong>2. Vorteile vergleichen</strong><span>Relevante Merkmale und Einsatzbereiche auf einen Blick.</span></div><div><strong>3. Bei Amazon prüfen</strong><span>Aktueller Preis, Verfügbarkeit, Versand und Rückgabe direkt beim Anbieter.</span></div>';
     const category=document.querySelector('.hc-category-nav');
     if(category)category.insertAdjacentElement('afterend',trust);else main.prepend(trust);
   }
 
-  if(!document.querySelector('.hc-buying-guide')){
+  if(isHome&&!document.querySelector('.hc-buying-guide')){
     const guide=document.createElement('section');
     guide.className='hc-buying-guide';
     guide.innerHTML='<div class="hc-guide-copy"><span class="hc-eyebrow">Kaufberatung</span><h2>Die richtige Wahl in drei Fragen</h2><p><strong>Passt es exakt zu deinem Modell?</strong> Prüfe Modellbezeichnung und Größe. <strong>Brauchst du starken Schutz oder ein dünnes Design?</strong> Verstärkte Ecken schützen besser, schlanke Hüllen tragen weniger auf. <strong>Nutzt du MagSafe?</strong> Dann sollte der Magnetring ausdrücklich kompatibel sein.</p></div><div class="hc-guide-points"><div><b>Modell</b><span>Exakte Gerätebezeichnung prüfen</span></div><div><b>Schutz</b><span>Kamera, Display und Ecken beachten</span></div><div><b>Funktion</b><span>MagSafe, Band oder Kartenfach wählen</span></div></div>';
