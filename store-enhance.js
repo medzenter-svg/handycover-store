@@ -10,6 +10,18 @@
     img.decoding='async';
   });
 
+  const ratgeberNodes=[...document.querySelectorAll('a,button')].filter(el=>(el.textContent||'').trim().toLowerCase()==='ratgeber');
+  ratgeberNodes.forEach(el=>{
+    if(el.tagName==='A'){
+      el.setAttribute('href','/ratgeber/');
+      el.removeAttribute('target');
+      el.setAttribute('aria-label','Zum Smartphone-Zubehör-Ratgeber');
+    }else{
+      el.addEventListener('click',()=>{location.href='/ratgeber/';});
+      el.setAttribute('aria-label','Zum Smartphone-Zubehör-Ratgeber');
+    }
+  });
+
   const path=(location.pathname||'/').replace(/index\.html$/,'');
   if(path!=='/'&&path!=='')return;
 
