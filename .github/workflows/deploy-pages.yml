@@ -94,6 +94,18 @@ jobs:
           cp store-theme.css dist/store-theme.css
           cp store-enhance.js dist/store-enhance.js
 
+          # Distinct favicon + header brand text so this domain doesn't look
+          # like an identical clone of handycover.com.
+          if [ -f favicon-store.svg ]; then
+            cp favicon-store.svg dist/favicon.svg
+          fi
+          find dist -type f -name '*.html' -print0 \
+            | xargs -0 sed -i \
+              -e 's|favicon\.svg?v=2|favicon.svg?v=3|g' \
+              -e 's|favicon\.svg%3Fv=2|favicon.svg%3Fv=3|g' \
+              -e 's|HandyCover\.com|HandyCover.Store|g' \
+              -e 's|HANDYCOVER\.COM|HANDYCOVER.STORE|g'
+
           # Add pages created specifically for handycover.store.
           if [ -d ratgeber ]; then
             rm -rf dist/ratgeber
