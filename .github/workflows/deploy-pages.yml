@@ -94,9 +94,14 @@ jobs:
           cp store-theme.css dist/store-theme.css
           cp store-enhance.js dist/store-enhance.js
 
+          # Add pages created specifically for handycover.store.
+          if [ -d ratgeber ]; then
+            rm -rf dist/ratgeber
+            cp -R ratgeber dist/ratgeber
+          fi
+
           python3 - <<'PY'
           from pathlib import Path
-          from urllib.parse import quote
           import re
 
           root = Path('dist')
@@ -111,10 +116,16 @@ jobs:
               inject = '<link rel="stylesheet" href="/store-theme.css"><script defer src="/store-enhance.js"></script>'
               canonical_path = '/' if file.name == 'index.html' and file.parent == root else '/' + file.relative_to(root).as_posix().replace('index.html','')
               canonical = f'<link rel="canonical" href="https://handycover.store{canonical_path}">'
-              if '</head>' in text:
-                  text = text.replace('</head>', canonical + inject + '</head>', 1)
+              if '/store-theme.css' not in text:
+                  if '</head>' in text:
+                      text = text.replace('</head>', canonical + inject + '</head>', 1)
+                  else:
+                      text = canonical + inject + text
               else:
-                  text = canonical + inject + text
+                  if '</head>' in text:
+                      text = text.replace('</head>', canonical + '</head>', 1)
+                  else:
+                      text = canonical + text
               file.write_text(text, encoding='utf-8')
               if file.name == 'index.html':
                   urls.append('https://handycover.store' + canonical_path)
