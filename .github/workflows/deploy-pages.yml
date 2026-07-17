@@ -139,6 +139,66 @@ jobs:
           (root/'robots.txt').write_text('User-agent: *\nAllow: /\n\nSitemap: https://handycover.store/sitemap.xml\n', encoding='utf-8')
           PY
 
+          pip install --quiet beautifulsoup4
+
+          python3 - <<'PY'
+          from pathlib import Path
+          from bs4 import BeautifulSoup
+          import json
+          import re
+
+          root = Path('dist')
+          price_re = re.compile(r'(\d{1,4}(?:\.\d{3})*,\d{2})\s*€')
+
+          def to_number(price_str):
+              return price_str.replace('.', '').replace(',', '.')
+
+          for file in root.rglob('*.html'):
+              html = file.read_text(encoding='utf-8', errors='ignore')
+              if '</head>' not in html:
+                  continue
+              soup = BeautifulSoup(html, 'html.parser')
+              products = []
+              seen = set()
+              for a in soup.find_all('a', href=True):
+                  img = a.find('img')
+                  if not img or not img.get('alt'):
+                      continue
+                  text = a.get_text(' ', strip=True)
+                  m = price_re.search(text)
+                  if not m:
+                      continue
+                  name = img.get('alt').strip()
+                  key = (name, m.group(1))
+                  if not name or key in seen:
+                      continue
+                  seen.add(key)
+                  src = img.get('src') or ''
+                  if src.startswith('http'):
+                      image_url = src
+                  else:
+                      image_url = 'https://handycover.store/' + src.lstrip('/')
+                  href = a.get('href')
+                  products.append({
+                      '@type': 'Product',
+                      'name': name,
+                      'image': image_url,
+                      'offers': {
+                          '@type': 'Offer',
+                          'price': to_number(m.group(1)),
+                          'priceCurrency': 'EUR',
+                          'availability': 'https://schema.org/InStock',
+                          'url': href,
+                      },
+                  })
+              if not products:
+                  continue
+              graph = {'@context': 'https://schema.org', '@graph': products}
+              script_tag = '<script type="application/ld+json">' + json.dumps(graph, ensure_ascii=False) + '</script>'
+              html = html.replace('</head>', script_tag + '</head>', 1)
+              file.write_text(html, encoding='utf-8')
+          PY
+
           echo "handycover.store" > dist/CNAME
           cp dist/index.html dist/404.html
 
