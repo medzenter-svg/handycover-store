@@ -14,3 +14,8 @@ a[class*="w-[110px]"][class*="shrink-0"] span[class*="text-[11px]"]{font-size:16
 a[class*="w-[110px]"][class*="shrink-0"] span[class*="4B0082"]{width:28px!important;height:28px!important;padding:0!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;font-size:14px!important;box-shadow:none!important}
 @media(max-width:1050px){a[class*="w-[110px]"][class*="shrink-0"]{width:132px!important}a[class*="w-[110px]"][class*="shrink-0"] img{height:88px!important;width:88px!important}}
 @media(max-width:700px){a[class*="w-[110px]"][class*="shrink-0"]{width:116px!important}a[class*="w-[110px]"][class*="shrink-0"] img{height:76px!important;width:76px!important}a[class*="w-[110px]"][class*="shrink-0"] p[class*="text-[10px]"]{font-size:12px!important}}
+/* --- Tierheim banner: purple text + paw print on both ends --- */
+.hc-shelter-note span{color:var(--hc-accent)!important}
+.hc-shelter-note span::after{content:" \1F43E"!important}
+.hc-shelter-text{color:var(--hc-accent)!important}
+.hc-shelter-text::after{content:" \1F43E"!important}
