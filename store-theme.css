@@ -23,3 +23,6 @@ a[class*="w-[110px]"][class*="shrink-0"] span[class*="4B0082"]{width:28px!import
 .hc-hero-badge{position:relative!important}
 .hc-hero-badge::before{content:"\2605 Unsere Empfehlung"!important;position:absolute!important;top:10px!important;left:10px!important;z-index:5!important;background:var(--hc-accent)!important;color:#fff!important;font-size:11px!important;font-weight:800!important;line-height:1!important;padding:5px 10px!important;border-radius:999px!important;box-shadow:0 4px 10px rgba(0,0,0,.18)!important;letter-spacing:.01em!important;white-space:nowrap!important}
 @media(max-width:700px){.hc-hero-badge::before{font-size:10px!important;padding:4px 8px!important}}
+/* --- Same badge, CSS-only, on the top hero mini-cards (reliable path) --- */
+a[class*="w-[110px]"][class*="shrink-0"]{position:relative!important}
+a[class*="w-[110px]"][class*="shrink-0"]::before{content:"\2605 Empfehlung"!important;position:absolute!important;top:6px!important;left:6px!important;z-index:5!important;background:var(--hc-accent)!important;color:#fff!important;font-size:9px!important;font-weight:800!important;line-height:1!important;padding:3px 7px!important;border-radius:999px!important;box-shadow:0 3px 8px rgba(0,0,0,.18)!important;letter-spacing:.01em!important;white-space:nowrap!important}
