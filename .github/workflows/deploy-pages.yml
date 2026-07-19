@@ -115,8 +115,10 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           import re
+          import os
 
           root = Path('dist')
+          ver = os.environ.get('GITHUB_SHA', '1')[:8]
           urls = []
           for file in root.rglob('*.html'):
               text = file.read_text(encoding='utf-8', errors='ignore')
@@ -125,7 +127,7 @@ jobs:
               text = text.replace('http://www.handycover.com', 'https://handycover.store')
               text = text.replace('http://handycover.com', 'https://handycover.store')
               text = re.sub(r'<link[^>]+rel=["\']canonical["\'][^>]*>', '', text, flags=re.I)
-              inject = '<link rel="stylesheet" href="/store-theme.css"><script defer src="/store-enhance.js"></script>'
+              inject = f'<link rel="stylesheet" href="/store-theme.css?v={ver}"><script defer src="/store-enhance.js?v={ver}"></script>'
               canonical_path = '/' if file.name == 'index.html' and file.parent == root else '/' + file.relative_to(root).as_posix().replace('index.html','')
               canonical = f'<link rel="canonical" href="https://handycover.store{canonical_path}">'
               if '/store-theme.css' not in text:
