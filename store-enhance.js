@@ -61,6 +61,8 @@
     pair.append(watch,airpods);
     watch.classList.add('hc-feature-card');
     airpods.classList.add('hc-feature-card');
+    watch.classList.add('hc-hero-badge');
+    airpods.classList.add('hc-hero-badge');
 
     if(samsung){
       const otherCards=[...document.querySelectorAll('a[href*="amazon.de"]')]
@@ -95,6 +97,7 @@
         const directChild=(ancestor,node)=>{let n=node;while(n&&n.parentElement!==ancestor)n=n.parentElement;return n;};
         directChild(hero,pair)?.classList.add('hc-home-left-column');
         directChild(hero,featured)?.classList.add('hc-home-right-column');
+        featured.classList.add('hc-hero-badge');
       }
     }
   }
